@@ -1,0 +1,24 @@
+var dataset = ee.ImageCollection('JAXA/GCOM-C/L3/OCEAN/SST/V3')
+                .filterDate('2018-01-01', '2018-03-30')
+                // filter to daytime data only
+                .filter(ee.Filter.eq('SATELLITE_DIRECTION', 'D'));
+
+// Multiply with slope coefficient and add offset
+var dataset = dataset.mean().multiply(0.0012).add(-10).clip(geometry);
+
+var vis = {
+  bands: ['SST_AVE'],
+  min: 0,
+  max: 30,
+  palette: ['000000', '005aff', '43c8c8', 'fff700', 'ff0000'],
+};
+
+Map.addLayer(dataset, vis, 'Sea Surface Temperature');
+
+Export.image.toDrive({
+  image: dataset,
+  description: 'SSTR_18',
+  region: geometry,
+  folder: 'Ecology',
+  fileFormat: 'GeoTIFF'
+});
